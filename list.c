@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void createList( dbl_linked_list_t* listPtr ) {
+void createList( linked_list_t* listPtr ) {
     listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
 }
 
-void insertNode( dbl_linked_list_t* listPtr, node_t* nPtr ) {
+void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
     if (listPtr->count == 0) {
         listPtr->headPtr = nPtr;
         listPtr->tailPtr = nPtr;
@@ -22,7 +22,7 @@ void insertNode( dbl_linked_list_t* listPtr, node_t* nPtr ) {
     }
 }
 
-node_t* popNode( dbl_linked_list_t* listPtr ) {
+node_t* popNode( linked_list_t* listPtr ) {
     if (listPtr->count > 1) {
         listPtr->headPtr = listPtr->headPtr->nextPtr;
         node_t* node = listPtr->headPtr->previousPtr;
@@ -40,7 +40,7 @@ node_t* popNode( dbl_linked_list_t* listPtr ) {
     }
 }
 
-node_t* dequeueNode( dbl_linked_list_t* listPtr ) {
+node_t* dequeueNode( linked_list_t* listPtr ) {
     if (listPtr->count > 1) {
         listPtr->tailPtr = listPtr->tailPtr->previousPtr;
         node_t* node = listPtr->tailPtr->nextPtr;
@@ -56,7 +56,7 @@ node_t* dequeueNode( dbl_linked_list_t* listPtr ) {
     }
 }
 
-void deleteList( dbl_linked_list_t* listPtr ) {
+void deleteList( linked_list_t* listPtr ) {
     if (listPtr->count == 0) {
         // do what's at the bottom
     } else {
@@ -72,7 +72,7 @@ void deleteList( dbl_linked_list_t* listPtr ) {
     listPtr->count = 0;
 }
 
-void traverseStack( const dbl_linked_list_t* listPtr ) { 
+void traverseStack( const linked_list_t* listPtr ) { 
     if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->headPtr;
     while (selectedNode->nextPtr != NULL) {
@@ -82,7 +82,7 @@ void traverseStack( const dbl_linked_list_t* listPtr ) {
     printf("%d\n", selectedNode->i);
 }
 
-void traverseQueue( const dbl_linked_list_t* listPtr ) {
+void traverseQueue( const linked_list_t* listPtr ) {
     if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->tailPtr;
     while (selectedNode->previousPtr != NULL) {
