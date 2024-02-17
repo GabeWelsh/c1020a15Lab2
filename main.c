@@ -11,13 +11,6 @@
 #include "node.h"
 #include "stock.h"
 
-// assumes `directory` is valid
-void report(DIR* directory);
-
-void buy(linked_list_t *list);
-
-void sell();
-
 int main() {
     FILE* output;
     DIR* directory = opendir(".");

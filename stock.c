@@ -4,6 +4,7 @@
 #include "stock.h"
 #include <stdio.h>
 
+
 void getStock( stock_t* stock ) {
 
 }
