@@ -1,21 +1,21 @@
 #ifndef STOCK_T
 #define STOCK_T
 
-#include <dirent.h>
 #include "date.h"
-#include "list.h"
+#include <stdio.h>
 #define MAX_TICKER_LENGTH 6
 
 typedef struct stock_t {
-       char ticker[MAX_TICKER_LENGTH];
-          date_t date; // date bought
-             int numShares;
-                double pricePerShare;
+   char ticker[MAX_TICKER_LENGTH];
+   date_t date; // date bought
+   int numShares;
+   double pricePerShare;
 } stock_t;
 
-void getStock( stock_t* stock );
-void report(DIR* directory);
-void buy(linked_list_t *list);
-void sell();
+// prints a stock in a purdy format:
+// <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
+void printStock( stock_t* stock);
+// reads value from given file to a stock
+void readStock( stock_t* stock, FILE* filePtr);
 
 #endif

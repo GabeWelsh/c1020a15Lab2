@@ -1,4 +1,5 @@
 #include "list.h"
+#include "stock.h"
 #include "node.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,19 +77,19 @@ void traverseStack( const linked_list_t* listPtr ) {
     if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->headPtr;
     while (selectedNode->nextPtr != NULL) {
-       printf("%d ", selectedNode->i);
-       selectedNode = selectedNode->nextPtr;
+        printStock(&selectedNode->stock);
+        selectedNode = selectedNode->nextPtr;
     }
-    printf("%d\n", selectedNode->i);
+    printStock(&selectedNode->stock);
 }
 
 void traverseQueue( const linked_list_t* listPtr ) {
     if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->tailPtr;
     while (selectedNode->previousPtr != NULL) {
-        printf("%d ", selectedNode->i);
+        printStock(&selectedNode->stock);
         selectedNode = selectedNode->previousPtr;
     }
-    printf("%d\n", selectedNode->i);
+    printStock(&selectedNode->stock);
 }
 

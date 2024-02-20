@@ -4,8 +4,8 @@
 #include "node.h"
 #include <stdlib.h>
 
-node_t* initNode(int num) {
+node_t* initNode(stock_t stock) {
     node_t* nodePtr = malloc(sizeof(node_t));
-    nodePtr->i = num;
+    nodePtr->stock = stock;
     return nodePtr;
 }

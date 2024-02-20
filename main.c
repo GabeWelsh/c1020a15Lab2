@@ -6,21 +6,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
 #include "list.h"
 #include "date.h"
 #include "node.h"
 #include "stock.h"
 
+int endsWithBin(const char *str) {
+    int str_len = strlen(str);
+    int suffix_len = strlen(".bin");
+
+    if (str_len < suffix_len) {
+        return 0;
+    }
+    return strncmp(str + str_len - suffix_len, ".bin", suffix_len) == 0;
+}
+
+
 int main() {
     FILE* output;
     DIR* directory = opendir(".");
+    struct dirent* dirEntryPtr;
     int userInput = -1; // must be set to enter loop
     int i;
     linked_list_t list;
     node_t* nPtr;
-
     createList(&list);
-    initNode( 123 );
+
+    //// use when reading
+    // while( (dirEntryPtr = readdir(directory)) != NULL) {
+    //     // if d_name ends in .bin
+    //     // fopen the file and make sure it's not NULL
+    //     // use readStock()
+    //     printf("%s\n", dirEntryPtr->d_name);
+    // }
 
     printf("Welcome to YourTrade.com\n");
     while (userInput != 0) {
@@ -29,6 +48,7 @@ int main() {
         scanf("%d", &userInput);
         switch (userInput) {
             case 0:
+                printf("Thank you for trading with YourTrade.com\n");
                 break;
             case 1:
                 if (directory == NULL) {
@@ -56,6 +76,5 @@ int main() {
     }
     closedir(directory);
 
-    printf("Thank you for trading with YourTrade.com\n");
     return 0;
 }
