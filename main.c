@@ -15,7 +15,6 @@
 int endsWithBin(const char *str) {
     int str_len = strlen(str);
     int suffix_len = strlen(".bin");
-
     if (str_len < suffix_len) {
         return 0;
     }
@@ -33,13 +32,27 @@ int main() {
     node_t* nPtr;
     createList(&list);
 
+    stock_t stockList[3];
+
+    i = 0;
     //// use when reading
-    // while( (dirEntryPtr = readdir(directory)) != NULL) {
-    //     // if d_name ends in .bin
-    //     // fopen the file and make sure it's not NULL
-    //     // use readStock()
-    //     printf("%s\n", dirEntryPtr->d_name);
-    // }
+    while( (dirEntryPtr = readdir(directory)) != NULL) {
+        // if d_name ends in .bin
+        // fopen the file and make sure it's not NULL
+        // use readStock()
+        if (endsWithBin(dirEntryPtr->d_name)) {
+            output = fopen(dirEntryPtr->d_name, "rb");
+            if (output != NULL) {
+                readStock(&stockList[i], output);
+            }
+            i++;
+        }
+    }
+
+    printf("Ticker  Purchase Date Shares Price Per Share\n---------------------------------------------\n");
+    for (int j = 0; j < 3; j++) {
+        printStock(&stockList[j]);
+    }
 
     printf("Welcome to YourTrade.com\n");
     while (userInput != 0) {
@@ -68,13 +81,9 @@ int main() {
                 break;
         }
     }
-    if (nPtr != NULL) {
-        free(nPtr);    
-    }
-    if (output != NULL) {
-        fclose(output);
-    }
+    free(dirEntryPtr);
+    fclose(output);
     closedir(directory);
-
+    
     return 0;
 }
