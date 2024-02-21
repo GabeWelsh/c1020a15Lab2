@@ -15,13 +15,18 @@ typedef struct stock_t {
 // prints a stock in a purdy format:
 // <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
 void printStock( stock_t* stock) {
-    printf("%6s     %2d/%2d/%4d %6d       $%8.2lf\n",
+    printf("%s    %2d/%2d/%4d   %6d        $%8.2lf\n",
     stock->ticker, stock->date.month, stock->date.day,
     stock->date.year, stock->numShares, stock->pricePerShare);
 }
 // reads value from given file to a stock
 // assumes filePtr is open to a valid file
 void readStock( stock_t* stock, FILE* filePtr) {
-    fread(stock, sizeof(stock_t), 1, filePtr);
+    stock_t temp;
+    fread(&temp, sizeof(stock_t), 1, filePtr);
+    while (!feof(filePtr)) {
+        fread(&temp, sizeof(stock_t), 1, filePtr);
+        printStock(&temp);
+    }
 }
 

@@ -1,0 +1,12 @@
+TODO:
+ - Modify the linked_list_t init function to read the files and set it up that way.
+ - define the `report`, `sell`, and `buy` function in main
+ - modify deqeue function to remove the oldest (closest to tail) stock of the given
+ticker symbol and print out the following information:
+    number of shares owned
+        ask the user for the number to sell
+        ask the user for the current stock price
+    print Shares sold: $# total
+    print shares bought: $# total
+    print gain: (Shares sold: $#) - (shares bought: $#)
+ - fix bug: print more than what's contained in the *.bin file

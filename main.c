@@ -21,20 +21,52 @@ int endsWithBin(const char *str) {
     return strncmp(str + str_len - suffix_len, ".bin", suffix_len) == 0;
 }
 
+/* What it does exactly:
+ * 0.
+ * make sure the linked list is valid (must have collected info on the .bin files
+ * already)
+ * 
+ * 1.
+ * Print a list of stocks owned like so:
+ *      Stocks Owned
+ *      ------------
+ *      AAPL     25
+ *      DISCA     5
+ *      GOOG     56
+ * Must use a doubly linked list. function from list.c to print
+ * (count the number of stocks, not files (duh))
+ * 
+ * 2.
+ * Ask the use for the ticker symbol like so:
+ *      Enter stock ticker symbol: <input> 
+ * 
+ * 3.
+ * Compare the input given to file names then read the file that was selected.
+ * If the user provides bad input, give them a warning and ask for a reinput.
+ * 
+ * 4.
+ * print the contents of the given file like so:
+ *     Ticker   Purchase Date    Shares   Price Per Share
+ *     --------------------------------------------------
+ *     DISCA      7/15/2021        5        $   30.93
+ * 
+ * 5.
+ * celebrate :D
+*/
+void report(DIR* directory, struct dirent* dirEntryPtr, linked_list_t* list);
+
 
 int main() {
     FILE* output;
     DIR* directory = opendir(".");
     struct dirent* dirEntryPtr;
     int userInput = -1; // must be set to enter loop
-    int i;
+    int i = 0;
     linked_list_t list;
     node_t* nPtr;
     createList(&list);
-
     stock_t stockList[3];
 
-    i = 0;
     //// use when reading
     while( (dirEntryPtr = readdir(directory)) != NULL) {
         // if d_name ends in .bin
@@ -44,12 +76,13 @@ int main() {
             output = fopen(dirEntryPtr->d_name, "rb");
             if (output != NULL) {
                 readStock(&stockList[i], output);
+                printStock(&stockList[i]);
             }
             i++;
         }
     }
 
-    printf("Ticker  Purchase Date Shares Price Per Share\n---------------------------------------------\n");
+    printf("Ticker  Purchase Date   Shares   Price Per Share\n------------------------------------------------\n");
     for (int j = 0; j < 3; j++) {
         printStock(&stockList[j]);
     }
@@ -64,11 +97,8 @@ int main() {
                 printf("Thank you for trading with YourTrade.com\n");
                 break;
             case 1:
-                if (directory == NULL) {
-                    printf("unable to read directory\n");
-                    return 1;
-                }
-                // report(directory);
+                directory = opendir(".");
+                //report(directory);
                 break;
             case 2:
                 //buy();
