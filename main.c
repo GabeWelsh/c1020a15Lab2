@@ -82,7 +82,7 @@ int main() {
         }
     }
 
-    printf("Ticker  Purchase Date   Shares   Price Per Share\n------------------------------------------------\n");
+    printf("Ticker  Purchase Date Shares Price Per Share\n---------------------------------------------\n");
     for (int j = 0; j < 3; j++) {
         printStock(&stockList[j]);
     }
