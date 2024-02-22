@@ -12,15 +12,6 @@
 #include "node.h"
 #include "stock.h"
 
-int endsWithBin(const char *str) {
-    int str_len = strlen(str);
-    int suffix_len = strlen(".bin");
-    if (str_len < suffix_len) {
-        return 0;
-    }
-    return strncmp(str + str_len - suffix_len, ".bin", suffix_len) == 0;
-}
-
 /* What it does exactly:
  * 0.
  * make sure the linked list is valid (must have collected info on the .bin files
@@ -41,8 +32,7 @@ int endsWithBin(const char *str) {
  *      Enter stock ticker symbol: <input> 
  * 
  * 3.
- * Compare the input given to file names then read the file that was selected.
- * If the user provides bad input, give them a warning and ask for a reinput.
+ * Print stocks that have the same ticker symbol in the list.
  * 
  * 4.
  * print the contents of the given file like so:
@@ -53,8 +43,12 @@ int endsWithBin(const char *str) {
  * 5.
  * celebrate :D
 */
-void report(DIR* directory, struct dirent* dirEntryPtr, linked_list_t* list);
+void report(DIR* directory, struct dirent* dirEntryPtr, linked_list_t* list) {
+    printf("Stocks Owned\n");
+    printf("------------\n");
+    
 
+}
 
 int main() {
     FILE* output;
@@ -64,28 +58,16 @@ int main() {
     int i = 0;
     linked_list_t list;
     node_t* nPtr;
-    createList(&list);
-    stock_t stockList[3];
 
-    //// use when reading
-    while( (dirEntryPtr = readdir(directory)) != NULL) {
-        // if d_name ends in .bin
-        // fopen the file and make sure it's not NULL
-        // use readStock()
-        if (endsWithBin(dirEntryPtr->d_name)) {
-            output = fopen(dirEntryPtr->d_name, "rb");
-            if (output != NULL) {
-                readStock(&stockList[i], output);
-                printStock(&stockList[i]);
-            }
-            i++;
-        }
-    }
-
-    printf("Ticker  Purchase Date Shares Price Per Share\n---------------------------------------------\n");
-    for (int j = 0; j < 3; j++) {
-        printStock(&stockList[j]);
-    }
+    // reads *.bin into the list
+    createList(&list, directory, dirEntryPtr);
+    
+    printf("Ticker  Purchase Date   Shares     Price Per Share\n");
+    printf("---------------------------------------------\n");
+    traverseQueue(&list);
+    //for (int j = 0; j < 3; j++) {
+    //    printStock(&stockList[j]);
+    //}
 
     printf("Welcome to YourTrade.com\n");
     while (userInput != 0) {

@@ -16,6 +16,6 @@ typedef struct stock_t {
 // <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
 void printStock( stock_t* stock);
 // reads value from given file to a stock
-void readStock( stock_t* stock, FILE* filePtr);
+void readIntoStock( stock_t* stock, FILE* filePtr);
 
 #endif

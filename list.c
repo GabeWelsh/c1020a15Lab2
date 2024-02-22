@@ -3,11 +3,41 @@
 #include "node.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-void createList( linked_list_t* listPtr ) {
+int endsWithBin(const char *str) {
+    int str_len = strlen(str);
+    int suffix_len = strlen(".bin");
+    if (str_len < suffix_len) {
+        return 0;
+    }
+    return strncmp(str + str_len - suffix_len, ".bin", suffix_len) == 0;
+}
+
+void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntryPtr) {
     listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
+    while( (dirEntryPtr = readdir(directory)) != NULL) {
+        FILE* output;
+        stock_t *stock;
+        if (endsWithBin(dirEntryPtr->d_name)) {
+            output = fopen(dirEntryPtr->d_name, "rb");
+            while (!feof(output)) {
+                if (output != NULL) {
+                    readIntoStock(stock, output);
+                    if (stock == NULL) {
+                        break;
+                    }
+                    insertNode(listPtr, initNode(*stock));
+                }
+            }
+        }
+    }
+}
+
+void printNumberOfOwnedStocks( linked_list_t* listPtr) {
+
 }
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {

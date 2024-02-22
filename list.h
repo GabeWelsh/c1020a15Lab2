@@ -5,6 +5,7 @@
 #define LIST_T
 
 #include "node.h"
+#include <dirent.h>
 
 typedef struct {
     node_t* headPtr;
@@ -12,7 +13,9 @@ typedef struct {
     int count;
 } linked_list_t;
 
-void createList( linked_list_t* listPtr );
+int endsWithBin(const char *str);
+void printNumberOfOwnedStocks( linked_list_t* listPtr);
+void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntryPtr );
 void insertNode( linked_list_t* listPtr, node_t* nPtr );
 node_t* popNode( linked_list_t* listPtr );
 node_t* dequeueNode( linked_list_t* listPtr );
