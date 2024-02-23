@@ -18,6 +18,7 @@ void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntry
     listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
+    
     while( (dirEntryPtr = readdir(directory)) != NULL) {
         FILE* output;
         stock_t *stock;
@@ -31,13 +32,13 @@ void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntry
                     }
                     insertNode(listPtr, initNode(*stock));
                 }
-            }
-        }
-    }
+            } // ugly braces here..
+        } // yeah, ik..
+    } // but it works... soo...
 }
 
 void printNumberOfOwnedStocks( linked_list_t* listPtr) {
-
+    
 }
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
