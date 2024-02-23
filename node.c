@@ -9,7 +9,3 @@ node_t* initNode(stock_t stock) {
     nodePtr->stock = stock;
     return nodePtr;
 }
-
-void deleteNode(stock_t stock) {
-    
-}

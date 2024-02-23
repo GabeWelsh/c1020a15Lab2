@@ -178,19 +178,19 @@ linked_list_t returnSpecifiedTicker( const linked_list_t* listPtr, const char ti
 	returnValue.headPtr = returnValue.tailPtr = NULL;
 	returnValue.count = 0;
 
-    node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode->previousPtr != NULL) {
-		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+    if (listPtr->count == 0) { return returnValue; }
+    node_t* selectedNode = listPtr->headPtr;
+    while (selectedNode != NULL) {
+		if (strcmp(selectedNode->stock.ticker, ticker) == 0) {
 			insertNode(&returnValue, selectedNode);
-        selectedNode = selectedNode->previousPtr;
+			selectedNode = selectedNode->nextPtr;
+        }
+        selectedNode = selectedNode->nextPtr;
     }
-	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
-		insertNode(&returnValue, selectedNode);
-
 	return returnValue;
 }
 
-int countTicker( const linked_list_t* listPtr, const char ticker[]) {
+int countTickerStocks( const linked_list_t* listPtr, const char ticker[]) {
 	int value = 0;
 	if (listPtr->count == 0) { return 0; }
     node_t* selectedNode = listPtr->tailPtr;
@@ -203,3 +203,85 @@ int countTicker( const linked_list_t* listPtr, const char ticker[]) {
 		value++;
 	return value;
 }
+
+int countTickerShares( const linked_list_t* listPtr, const char ticker[]) {
+	int value = 0;
+	if (listPtr->count == 0) { return 0; }
+    node_t* selectedNode = listPtr->tailPtr;
+    while (selectedNode->previousPtr != NULL) {
+		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+			value += selectedNode->stock.numShares;
+        selectedNode = selectedNode->previousPtr;
+    }
+	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+		value += selectedNode->stock.numShares;
+	return value;
+}
+
+// assumes only one type of stock (ticker) & removes stocks
+// double calculateSell(linked_list_t* listPtr, int numberToSell, double stockPrice) {
+// 	double sum = 0;
+	
+// 	if (listPtr->count == 0) { return sum; }
+//     node_t* selectedNode = listPtr->tailPtr;
+//     while (selectedNode->previousPtr != NULL) {
+//     	printf("Enter: \n"); printStock(&selectedNode->stock);
+// 	    if ((selectedNode->stock.numShares - numberToSell) < 0) {
+// 			printf("using it up\n");
+// 			sum += selectedNode->stock.numShares * stockPrice;
+// 			numberToSell = abs((selectedNode->stock.numShares));
+// 	        selectedNode = selectedNode->previousPtr;
+// 		} else {
+// 			printf("not deleting\n");
+// 			selectedNode->stock.numShares = selectedNode->stock.numShares - numberToSell;
+// 			sum += selectedNode->stock.numShares * stockPrice;
+// 		}
+// 		printf("After: \n");
+// 		printStock(&selectedNode->stock);
+//     }
+    
+
+// 	return sum;
+// }
+
+calculate_sell_t calculateSell(linked_list_t* listPtr, int numberToSell, double stockPrice) {
+    double sum = 0;
+	double originalSum = 0;
+    calculate_sell_t finally;
+    finally.originalSum = finally.sum = 0;
+
+    if (listPtr->count == 0) { return finally; }
+	printf("Before calculations\n");
+	traverseQueue(listPtr);
+    node_t* selectedNode = listPtr->tailPtr;
+    while (selectedNode != NULL) {
+        if (selectedNode->stock.numShares <= numberToSell) {
+            sum += selectedNode->stock.numShares * stockPrice;
+			originalSum += selectedNode->stock.pricePerShare * selectedNode->stock.numShares;
+            numberToSell -= selectedNode->stock.numShares;
+            selectedNode = selectedNode->previousPtr;
+            free(selectedNode->nextPtr);
+        } else {
+            selectedNode->stock.numShares -= numberToSell;
+            sum += numberToSell * stockPrice;
+			originalSum += (selectedNode->stock.numShares - numberToSell) * selectedNode->stock.pricePerShare;
+            numberToSell = 0;
+            break;
+        }
+    }
+	printf("After calculations\n");
+	traverseQueue(listPtr);
+
+	node_t* currentNode = listPtr->tailPtr;
+    while (currentNode != NULL) {
+		if (currentNode->stock.numShares == 0) {
+			currentNode = currentNode->previousPtr;
+			free(currentNode->nextPtr);
+		}
+	}
+
+	finally.originalSum = originalSum;
+	finally.sum = sum;
+    return finally;
+}
+
