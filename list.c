@@ -32,9 +32,9 @@ void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntry
                     }
                     insertNode(listPtr, initNode(*stock));
                 }
-            } // ugly braces here..
-        } // yeah, ik..
-    } // but it works... soo...
+            }
+        }
+    }
 }
 
 void printNumberOfOwnedStocks( linked_list_t* listPtr) {
