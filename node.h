@@ -9,5 +9,5 @@ typedef struct node_t {
 } node_t;
 
 node_t* initNode(stock_t stock);
-
+void deleteNode(stock_t stock);
 #endif

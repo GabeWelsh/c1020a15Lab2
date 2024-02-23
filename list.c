@@ -14,11 +14,12 @@ int endsWithBin(const char *str) {
     return strncmp(str + str_len - suffix_len, ".bin", suffix_len) == 0;
 }
 
-void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntryPtr) {
+void createList( linked_list_t* listPtr, DIR* directory) {
     listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
-    
+    struct dirent* dirEntryPtr;
+
     while( (dirEntryPtr = readdir(directory)) != NULL) {
         FILE* output;
         stock_t *stock;
@@ -35,6 +36,7 @@ void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntry
             } // ugly braces here..
         } // yeah, ik..
     } // but it works... soo...
+	free(dirEntryPtr);
 }
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
@@ -132,7 +134,7 @@ void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
     	printStock(&selectedNode->stock);
 }
 
-void printNumberOfOwnedStocks( linked_list_t* listPtr) {
+void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
     char * stockNames[20] = {NULL};
     int stockCount[20] = {0};
     int length = 20;
@@ -169,4 +171,35 @@ void printNumberOfOwnedStocks( linked_list_t* listPtr) {
             printf("%s  %6d\n", stockNames[i], stockCount[i]);
         }
     }
+}
+
+linked_list_t returnSpecifiedTicker( const linked_list_t* listPtr, const char ticker[]) {
+	linked_list_t returnValue;
+	returnValue.headPtr = returnValue.tailPtr = NULL;
+	returnValue.count = 0;
+
+    node_t* selectedNode = listPtr->tailPtr;
+    while (selectedNode->previousPtr != NULL) {
+		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+			insertNode(&returnValue, selectedNode);
+        selectedNode = selectedNode->previousPtr;
+    }
+	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+		insertNode(&returnValue, selectedNode);
+
+	return returnValue;
+}
+
+int countTicker( const linked_list_t* listPtr, const char ticker[]) {
+	int value = 0;
+	if (listPtr->count == 0) { return 0; }
+    node_t* selectedNode = listPtr->tailPtr;
+    while (selectedNode->previousPtr != NULL) {
+		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+			value++;
+        selectedNode = selectedNode->previousPtr;
+    }
+	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+		value++;
+	return value;
 }

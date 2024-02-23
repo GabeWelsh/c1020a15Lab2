@@ -14,9 +14,12 @@ typedef struct {
 } linked_list_t;
 
 int endsWithBin(const char *str);
-void printNumberOfOwnedStocks( linked_list_t* listPtr);
+void printNumberOfOwnedStocks( const linked_list_t* listPtr);
 void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]);
-void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntryPtr );
+int countTicker( const linked_list_t* listPtr, const char ticker[]);
+linked_list_t returnSpecifiedTicker(const linked_list_t* listPtr, const char ticker[]);
+
+void createList( linked_list_t* listPtr, DIR* directory);
 void insertNode( linked_list_t* listPtr, node_t* nPtr );
 node_t* popNode( linked_list_t* listPtr );
 node_t* dequeueNode( linked_list_t* listPtr );
