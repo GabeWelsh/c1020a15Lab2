@@ -15,6 +15,7 @@ typedef struct {
 
 int endsWithBin(const char *str);
 void printNumberOfOwnedStocks( linked_list_t* listPtr);
+void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]);
 void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntryPtr );
 void insertNode( linked_list_t* listPtr, node_t* nPtr );
 node_t* popNode( linked_list_t* listPtr );

@@ -32,13 +32,9 @@ void createList( linked_list_t* listPtr, DIR* directory, struct dirent* dirEntry
                     }
                     insertNode(listPtr, initNode(*stock));
                 }
-            }
-        }
-    }
-}
-
-void printNumberOfOwnedStocks( linked_list_t* listPtr) {
-    
+            } // ugly braces here..
+        } // yeah, ik..
+    } // but it works... soo...
 }
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
@@ -124,3 +120,53 @@ void traverseQueue( const linked_list_t* listPtr ) {
     printStock(&selectedNode->stock);
 }
 
+void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
+	if (listPtr->count == 0) { return; }
+    node_t* selectedNode = listPtr->tailPtr;
+    while (selectedNode->previousPtr != NULL) {
+		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+        	printStock(&selectedNode->stock);
+        selectedNode = selectedNode->previousPtr;
+    }
+	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
+    	printStock(&selectedNode->stock);
+}
+
+void printNumberOfOwnedStocks( linked_list_t* listPtr) {
+    char * stockNames[20] = {NULL};
+    int stockCount[20] = {0};
+    int length = 20;
+
+    if (listPtr->count == 0) { return; }
+    node_t* selectedNode = listPtr->tailPtr;
+    while (selectedNode->previousPtr != NULL) {
+        for (int i = 0; i < length; i++) {
+            if (stockNames[i] == NULL) {
+                stockNames[i] = selectedNode->stock.ticker;
+                stockCount[i] = 1;
+                break;
+            } else if (strcmp(selectedNode->stock.ticker, stockNames[i]) == 0) {
+                stockCount[i]++;
+                break;
+            }
+        }
+        selectedNode = selectedNode->previousPtr;
+    }
+    for (int i = 0; i < length; i++) {
+        if (stockNames[i] == NULL) {
+            stockNames[i] = selectedNode->stock.ticker;
+            stockCount[i] = 1;
+            break;
+        } else if (strcmp(selectedNode->stock.ticker, stockNames[i]) == 0) {
+            stockCount[i]++;
+            break;
+        }
+    }
+    printf("Stocks Owned\n");
+    printf("------------\n");
+    for (int i = 0; i < length; i++) {
+        if (stockNames[i] != NULL) {
+            printf("%s  %6d\n", stockNames[i], stockCount[i]);
+        }
+    }
+}

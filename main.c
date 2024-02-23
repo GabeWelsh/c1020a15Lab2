@@ -44,9 +44,13 @@
  * celebrate :D
 */
 void report(DIR* directory, struct dirent* dirEntryPtr, linked_list_t* list) {
-    printf("Stocks Owned\n");
-    printf("------------\n");
     
+    printNumberOfOwnedStocks(list);
+
+    char input[10];
+    printf("Enter stock ticker symbol: ");
+    scanf("%s\n",input);
+    printSpecificTicker(list, input);
 
 }
 
@@ -61,13 +65,6 @@ int main() {
 
     // reads *.bin into the list
     createList(&list, directory, dirEntryPtr);
-    
-    printf("Ticker  Purchase Date   Shares     Price Per Share\n");
-    printf("---------------------------------------------\n");
-    traverseQueue(&list);
-    //for (int j = 0; j < 3; j++) {
-    //    printStock(&stockList[j]);
-    //}
 
     printf("Welcome to YourTrade.com\n");
     while (userInput != 0) {
@@ -79,8 +76,7 @@ int main() {
                 printf("Thank you for trading with YourTrade.com\n");
                 break;
             case 1:
-                directory = opendir(".");
-                //report(directory);
+                report(directory, dirEntryPtr, &list);
                 break;
             case 2:
                 //buy();
@@ -89,13 +85,15 @@ int main() {
                 //sell()
                 break;
             default:
-                printf("Enter a valid input.\n");
+                printf("Please enter a valid input.\n");
+                userInput = -1; // in case the user inputs a non-int
                 break;
         }
     }
     free(dirEntryPtr);
-    fclose(output);
+    // fclose(output);
     closedir(directory);
+    deleteList(&list);
     
     return 0;
 }
