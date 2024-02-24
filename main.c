@@ -12,7 +12,7 @@
 #include "node.h"
 #include "stock.h"
 
-void report(const linked_list_t* list) { 
+void report(linked_list_t* list) { 
     printNumberOfOwnedStocks(list);
 
     char input[MAX_TICKER_LENGTH];
@@ -21,6 +21,8 @@ void report(const linked_list_t* list) {
     printf("Ticker   Purchase Date   Shares   Price Per Share\n");
     printf("-------------------------------------------------\n");
     printSpecificTicker(list, input);
+
+    deleteList(list);
 
 }
 
@@ -31,51 +33,81 @@ void buy(linked_list_t* list) {
     scanf("%s",input);
 }
 
-void sell(linked_list_t* list) {
-    char input[MAX_TICKER_LENGTH];
+void sell() {
+    char ticker[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
-    scanf("%s",input);
-    int count = countTickerShares(list, input);
-    if (count == 0) {
-        printf("You do not own any \"%s\" stocks", input);
+    scanf("%s", ticker);
+
+    char filename[MAX_TICKER_LENGTH + 5]; // +5 for ".bin"
+    snprintf(filename, sizeof(filename), "%s.bin", ticker);
+    
+    FILE* fileRB = fopen(filename, "rb");
+    if (fileRB == NULL) {
+        printf("You do not own any \"%s\" stocks.\n", ticker);
         return;
     }
-    linked_list_t newList = returnSpecifiedTicker(list, input);
-    int numSell;
-    printf("Enter number of shares to sell: ");
-    scanf("%d", &numSell);
-    if (count < numSell) {
+    // get data from file
+    stock_t tempStock;
+    linked_list_t list;
+    createList(&list);
+
+    while (!feof(fileRB)) {
+        readIntoStock(&tempStock, fileRB);
+        insertNode(&list, initNode(tempStock));
+    }
+    fclose(fileRB);
+
+    // print # of shares and get input
+    int shares = countShares(&list);
+    printf("You own %d shares of \"%s\"\n", shares, "GOOG");
+    int toSell;
+    double stockPrice;
+    printf("How many do you want to sell? ");
+    scanf("%d", &toSell);
+    if (toSell > countShares(&list)) {
         printf("You do not own that many shares!\n");
         return;
     }
-    double stockPrice;
-    printf("Enter stock price: ");
+    printf("What is the current stock price? ");
     scanf("%lf", &stockPrice);
-    /*
-        2. go through the queue of stocks removing the number of shares 
-    needed and calculating and printing the total price to buy the stocks
-      a. total selling price, and the gains (or losses).
-        3. Open the file again in write mode and writes the entire file from the updated contents of the list
-      a. If the user sells all shares of a stock in a file, then the program has to delete the file
-    */
-    
-    double GainOrLoss;
-    calculate_sell_t sell = calculateSell(&newList, numSell, stockPrice);
-    printf("Shares sold: $%.2lf\n", sell.sum);
-    printf("Shares bought: $%.2lf\n", sell.originalSum);
-    if (sell.sum > sell.originalSum)
-        printf("Gained: $%.2lf\n", sell.sum - sell.originalSum);
+    // calc money and edit list accordingly
+    double priceToBuy, sellingPrice;
+    while (toSell > 0) { // Note: not possible to go out of bounds (line 97) so no need to check ********************************
+        if (list.tailPtr->stock.numShares > toSell) { // not deleting all shares (end loop)
+            priceToBuy += toSell * list.tailPtr->stock.pricePerShare;
+            sellingPrice += toSell * stockPrice;
+            int temp = list.tailPtr->stock.numShares;
+            list.tailPtr->stock.numShares -= toSell;
+            toSell -= temp; // should be negative
+        } else { // either we move to next stock or num of shares = num to sell
+            priceToBuy += list.tailPtr->stock.pricePerShare * list.tailPtr->stock.numShares; // all of them
+            sellingPrice += list.tailPtr->stock.numShares * stockPrice;
+            toSell -= list.tailPtr->stock.numShares;
+            dequeueNode(&list); // it changes tailPtr
+        }
+    }
+    // print results
+    printf("Total price to buy the stocks: $%.2lf\n", priceToBuy);
+    printf("The total selling price: $%.2lf\n", sellingPrice);
+    if (priceToBuy > sellingPrice)
+        printf("You lost: $%.2lf\n", (priceToBuy-sellingPrice));
     else
-        printf("Lost: $%.2lf\n", sell.originalSum - sell.sum);
+        printf("You gained: $%.2lf\n", (sellingPrice - priceToBuy));
+    // update file
+    FILE* overwrite = fopen(filename, "wb");
+    if (overwrite == NULL) {
+        printf("For some reason, the file can't be opened for writing\n");
+        return;
+    }
+    listUpdateSingleFile(&list, filename);
+    deleteList(&list);
 }
 
 int main() {
-    DIR* directory = opendir(".");
+    DIR* directory;
     int userInput = -1; // must be set to enter loop
     linked_list_t mainList;
-    // reads *.bin into the list
-    createList(&mainList, directory);
-
+    
     printf("Welcome to YourTrade.com\n");
     while (userInput != 0) {
         printf("Reporting, buying or selling?\n");
@@ -87,27 +119,29 @@ int main() {
                 break;
             case 1:
                 directory = opendir(".");
-                createList(&mainList, directory);
+                createListFromFiles(&mainList, directory);
                 report(&mainList);
+                closedir(directory);
+                deleteList(&mainList);
                 break;
             case 2:
                 directory = opendir(".");
-                createList(&mainList, directory);
+                createListFromFiles(&mainList, directory);
                 //buy();
+                closedir(directory);
+                deleteList(&mainList);
                 break;
             case 3:
                 directory = opendir(".");
-                createList(&mainList, directory);
-                sell(&mainList);
+                createListFromFiles(&mainList, directory);
+                sell();
+                // closedir(directory);
+                // deleteList(&mainList);
                 break;
             default:
                 printf("Please enter a valid input.\n");
-                userInput = -1; // in case the user inputs a non-int
                 break;
         }
-    }
-    closedir(directory);
-    deleteList(&mainList);
-    
+    }    
     return 0;
 }
