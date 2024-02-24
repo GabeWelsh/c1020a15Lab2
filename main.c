@@ -71,6 +71,7 @@ void sell() {
     scanf("%lf", &stockPrice);
     // calc money and edit list accordingly
     double priceToBuy, sellingPrice;
+    priceToBuy = sellingPrice = 0;
     while (toSell > 0) { // Note: not possible to go out of bounds (line 97) so no need to check ********************************
         if (list.tailPtr->stock.numShares > toSell) { // not deleting all shares (end loop)
             priceToBuy += toSell * list.tailPtr->stock.pricePerShare;
