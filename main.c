@@ -12,18 +12,14 @@
 #include "node.h"
 #include "stock.h"
 
-void report(linked_list_t* list) { 
+void report(const linked_list_t* list) { 
     printNumberOfOwnedStocks(list);
-
     char input[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
     scanf("%s",input);
     printf("Ticker   Purchase Date   Shares   Price Per Share\n");
     printf("-------------------------------------------------\n");
     printSpecificTicker(list, input);
-
-    deleteList(list);
-
 }
 
 void buy(linked_list_t* list) {
@@ -59,13 +55,16 @@ void sell() {
 
     // print # of shares and get input
     int shares = countShares(&list);
-    printf("You own %d shares of \"%s\"\n", shares, "GOOG");
+    printf("You own %d shares of \"%s\"\n", shares, filename);
     int toSell;
     double stockPrice;
     printf("How many do you want to sell? ");
     scanf("%d", &toSell);
     if (toSell > countShares(&list)) {
         printf("You do not own that many shares!\n");
+        return;
+    } else if (toSell <= 0) {
+        printf("Input must be above 0\n");
         return;
     }
     printf("What is the current stock price? ");
@@ -121,8 +120,8 @@ int main() {
                 directory = opendir(".");
                 createListFromFiles(&mainList, directory);
                 report(&mainList);
-                closedir(directory);
                 deleteList(&mainList);
+                closedir(directory);
                 break;
             case 2:
                 directory = opendir(".");
@@ -132,11 +131,7 @@ int main() {
                 deleteList(&mainList);
                 break;
             case 3:
-                directory = opendir(".");
-                createListFromFiles(&mainList, directory);
                 sell();
-                // closedir(directory);
-                // deleteList(&mainList);
                 break;
             default:
                 printf("Please enter a valid input.\n");

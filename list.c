@@ -27,13 +27,13 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
 	struct dirent* dirEntryPtr;
 
     while( (dirEntryPtr = readdir(directory)) != NULL) {
-        FILE* output;
+        FILE* input;
         stock_t *stock;
         if (containsText(dirEntryPtr->d_name, ".bin")) {
-            output = fopen(dirEntryPtr->d_name, "rb");
-            while (!feof(output)) {
-                if (output != NULL) {
-                    readIntoStock(stock, output);
+            input = fopen(dirEntryPtr->d_name, "rb");
+            while (!feof(input)) {
+                if (input != NULL) {
+                    readIntoStock(stock, input);
                     if (stock == NULL) {
                         break;
                     }
@@ -42,7 +42,6 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
             } // ugly braces here..
         } // yeah, ik..
     } // but it works... soo...
-	free(dirEntryPtr);
 }
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
@@ -119,37 +118,39 @@ void traverseStack( const linked_list_t* listPtr ) {
 }
 
 void traverseQueue( const linked_list_t* listPtr ) {
-    if (listPtr->count == 0) { return; }
+    if (listPtr->count == 0) { 
+        printf("Empty list\n");
+        return;
+    }
     node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode->previousPtr != NULL) {
+    while (selectedNode != NULL) {
         printStock(&selectedNode->stock);
         selectedNode = selectedNode->previousPtr;
     }
-    printStock(&selectedNode->stock);
 }
 
 void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
 	if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode->previousPtr != NULL) {
+    while (selectedNode != NULL) {
 		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
         	printStock(&selectedNode->stock);
         selectedNode = selectedNode->previousPtr;
     }
-	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
-    	printStock(&selectedNode->stock);
 }
 
 void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
-    char * stockNames[20] = {NULL};
+    char* stockNames[20] = {NULL};
     int stockCount[20] = {0};
     int length = 20;
 
     if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode->previousPtr != NULL) {
+    while (selectedNode != NULL) {
         for (int i = 0; i < length; i++) {
             if (stockNames[i] == NULL) {
+                stockNames[i] = malloc(MAX_TICKER_LENGTH);
+                strncpy(stockNames[i], selectedNode->stock.ticker, MAX_TICKER_LENGTH);
                 stockNames[i] = selectedNode->stock.ticker;
                 stockCount[i] = 1;
                 break;
@@ -160,21 +161,15 @@ void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
         }
         selectedNode = selectedNode->previousPtr;
     }
-    for (int i = 0; i < length; i++) {
-        if (stockNames[i] == NULL) {
-            stockNames[i] = selectedNode->stock.ticker;
-            stockCount[i] = 1;
-            break;
-        } else if (strcmp(selectedNode->stock.ticker, stockNames[i]) == 0) {
-            stockCount[i]++;
-            break;
-        }
+    if (stockNames[0] == NULL){
+        printf("You do not own any stocks\n");
     }
     printf("Stocks Owned\n");
     printf("------------\n");
     for (int i = 0; i < length; i++) {
         if (stockNames[i] != NULL) {
             printf("%s  %6d\n", stockNames[i], stockCount[i]);
+            free(stockNames[i]);
         }
     }
 }
@@ -207,13 +202,18 @@ int countShares( const linked_list_t* listPtr) {
 
 // overwrites then closes given file | assumes `overwrite` is valid
 void listUpdateSingleFile(const linked_list_t* listPtr, char* filename) {
-    node_t* selectedNode = listPtr->tailPtr;
-    FILE* overwrite = fopen(filename, "wb");
-    fclose(overwrite);
+    FILE* overwrite;
+    if (overwrite == NULL) {
+        printf("could not open file in write mode\n");
+        return;
+    }
+    remove(filename);
     if (listPtr->count == 0) {
-        remove(filename);
+        fclose(overwrite);
+        return;
     }
     overwrite = fopen(filename, "wb");
+    node_t* selectedNode = listPtr->tailPtr;
     while (selectedNode != NULL) {
         fwrite(&selectedNode->stock, sizeof(stock_t), 1, overwrite);
         selectedNode = selectedNode->previousPtr;
