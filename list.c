@@ -51,6 +51,7 @@ void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
         listPtr->count++;
     } else {
         nPtr->nextPtr = listPtr->headPtr;
+        nPtr->previousPtr = NULL;
         listPtr->headPtr->previousPtr = nPtr;
         listPtr->headPtr = nPtr;
         listPtr->count++;
@@ -93,18 +94,9 @@ node_t* dequeueNode( linked_list_t* listPtr ) {
 }
 
 void deleteList( linked_list_t* listPtr ) {
-    if (listPtr->count == 0) {
-        // do what's at the bottom
-    } else {
-        node_t* selectedNode = listPtr->headPtr;
-        while (selectedNode->nextPtr != NULL) {
-            selectedNode = selectedNode->nextPtr;
-            free(selectedNode->previousPtr);
-        }
-        free(selectedNode);
+    while (listPtr->count != 0) {
+        free(dequeueNode(listPtr));
     }
-    listPtr->headPtr = listPtr->tailPtr = NULL;
-    listPtr->count = 0;
 }
 
 void traverseStack( const linked_list_t* listPtr ) { 
@@ -149,8 +141,7 @@ void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
     while (selectedNode != NULL) {
         for (int i = 0; i < length; i++) {
             if (stockNames[i] == NULL) {
-                stockNames[i] = malloc(MAX_TICKER_LENGTH);
-                strncpy(stockNames[i], selectedNode->stock.ticker, MAX_TICKER_LENGTH);
+                stockNames[i] = selectedNode->stock.ticker;
                 stockNames[i] = selectedNode->stock.ticker;
                 stockCount[i] = 1;
                 break;
@@ -169,7 +160,6 @@ void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
     for (int i = 0; i < length; i++) {
         if (stockNames[i] != NULL) {
             printf("%s  %6d\n", stockNames[i], stockCount[i]);
-            free(stockNames[i]);
         }
     }
 }
@@ -200,24 +190,33 @@ int countShares( const linked_list_t* listPtr) {
 	return value;
 }
 
-// overwrites then closes given file | assumes `overwrite` is valid
-void listUpdateSingleFile(const linked_list_t* listPtr, char* filename) {
+// deletes the given list | assumes `overwrite` is valid
+void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
     FILE* overwrite;
+    if( remove(filename) != 0 )
+        perror( "Error deleting file" );
+    else
+        puts( "File successfully deleted" );
+    if (listPtr->count == 0) {
+        return;
+    }
+    overwrite = fopen(filename, "wb");
     if (overwrite == NULL) {
         printf("could not open file in write mode\n");
         return;
     }
-    remove(filename);
-    if (listPtr->count == 0) {
-        fclose(overwrite);
-        return;
+    int count = 0;
+    printf("-------- the list -------\n");
+    traverseQueue(listPtr);
+    printf("----- entering loop -----\n");
+    while (!(listPtr->count <= 0)) {
+        count++;
+        printf("Writing line %d: ", count);
+        node_t* temp = dequeueNode(listPtr);
+        printStock(&temp->stock);
+        fwrite((char*)(&temp->stock), sizeof(stock_t), 1, overwrite);
+        free(temp);
     }
-    overwrite = fopen(filename, "wb");
-    node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode != NULL) {
-        fwrite(&selectedNode->stock, sizeof(stock_t), 1, overwrite);
-        selectedNode = selectedNode->previousPtr;
-    }
+    printf("------ exiting loop ------\n");
     fclose(overwrite);
 }
-

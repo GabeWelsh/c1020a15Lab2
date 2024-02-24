@@ -14,7 +14,7 @@ typedef struct stock_t {
 
 // prints a stock in a purdy format:
 // <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
-void printStock( stock_t* stock) {
+void printStock( const stock_t* stock) {
     printf(" %s     %2d/%2d/%4d   %6d         $%3.2lf\n",
     stock->ticker, stock->date.month, stock->date.day,
     stock->date.year, stock->numShares, stock->pricePerShare);

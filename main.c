@@ -20,6 +20,7 @@ void report(const linked_list_t* list) {
     printf("Ticker   Purchase Date   Shares   Price Per Share\n");
     printf("-------------------------------------------------\n");
     printSpecificTicker(list, input);
+    return;
 }
 
 void buy(linked_list_t* list) {
@@ -46,7 +47,6 @@ void sell() {
     stock_t tempStock;
     linked_list_t list;
     createList(&list);
-
     while (!feof(fileRB)) {
         readIntoStock(&tempStock, fileRB);
         insertNode(&list, initNode(tempStock));
@@ -82,7 +82,7 @@ void sell() {
             priceToBuy += list.tailPtr->stock.pricePerShare * list.tailPtr->stock.numShares; // all of them
             sellingPrice += list.tailPtr->stock.numShares * stockPrice;
             toSell -= list.tailPtr->stock.numShares;
-            dequeueNode(&list); // it changes tailPtr
+            free(dequeueNode(&list)); // it changes tailPtr
         }
     }
     // print results
@@ -99,16 +99,15 @@ void sell() {
         return;
     }
     listUpdateSingleFile(&list, filename);
-    deleteList(&list);
 }
 
 int main() {
     DIR* directory;
-    int userInput = -1; // must be set to enter loop
+    int userInput;
     linked_list_t mainList;
     
     printf("Welcome to YourTrade.com\n");
-    while (userInput != 0) {
+    do {
         printf("Reporting, buying or selling?\n");
         printf("(0=quit, 1=report, 2=buy, 3=sell): ");
         scanf("%d", &userInput);
@@ -119,9 +118,12 @@ int main() {
             case 1:
                 directory = opendir(".");
                 createListFromFiles(&mainList, directory);
+
                 report(&mainList);
+
                 deleteList(&mainList);
                 closedir(directory);
+
                 break;
             case 2:
                 directory = opendir(".");
@@ -137,6 +139,6 @@ int main() {
                 printf("Please enter a valid input.\n");
                 break;
         }
-    }    
+    } while (userInput != 0);
     return 0;
 }

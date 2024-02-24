@@ -18,7 +18,7 @@ void printNumberOfOwnedStocks( const linked_list_t* listPtr);
 void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]);
 int countTickerStocks( const linked_list_t* listPtr, const char ticker[]);
 int countShares( const linked_list_t* listPtr);
-void listUpdateSingleFile( const linked_list_t* listPtr, char* filename );
+void listUpdateSingleFile( linked_list_t* listPtr, const char* filename );
 
 void createList( linked_list_t* listPtr);
 void createListFromFiles(linked_list_t *listPtr, DIR *directory);
