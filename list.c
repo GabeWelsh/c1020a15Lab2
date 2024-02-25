@@ -25,7 +25,7 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
 	struct dirent* dirEntryPtr;
-
+    
     while( (dirEntryPtr = readdir(directory)) != NULL) {
         FILE* input;
         stock_t *stock;
@@ -195,8 +195,6 @@ void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
     FILE* overwrite;
     if( remove(filename) != 0 )
         perror( "Error deleting file" );
-    else
-        puts( "File successfully deleted" );
     if (listPtr->count == 0) {
         return;
     }
@@ -214,7 +212,7 @@ void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
         printf("Writing line %d: ", count);
         node_t* temp = dequeueNode(listPtr);
         printStock(&temp->stock);
-        fwrite((char*)(&temp->stock), sizeof(stock_t), 1, overwrite);
+        fwrite(&temp->stock, sizeof(stock_t), 1, overwrite);
         free(temp);
     }
     printf("------ exiting loop ------\n");

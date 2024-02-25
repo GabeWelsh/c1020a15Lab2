@@ -1,7 +1,6 @@
 /* Name: main.c
  * Description: contains `main` and functions for
  *              reporting, buying, and selling stocks
- * Where I learned DIR: https://c-for-dummies.com/blog/?p=3246
 */
 #include <stdio.h>
 #include <stdlib.h>
