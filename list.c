@@ -1,17 +1,41 @@
 #include "list.h"
 #include "stock.h"
+#include "date.h"
 #include "node.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 int containsText(const char *mainText, const char* minorText) {
-    int str_len = strlen(mainText);
-    int suffix_len = strlen(minorText);
-    if (str_len < suffix_len) {
+    int main_len = strlen(mainText);
+    int minor_len = strlen(minorText);
+    if (main_len < minor_len) {
         return 0;
     }
-    return strncmp(mainText + str_len - suffix_len, ".bin", suffix_len) == 0;
+    return strncmp(mainText + main_len - minor_len, ".bin", minor_len) == 0;
+}
+
+// sorts in decending order (oldest at tail)
+void sortList(linked_list_t *listPtr) {
+    if (listPtr->count <= 1) {
+        return;
+    }
+    node_t *nodeOne, *nodeTwo;
+    stock_t tempStock;
+
+    for (nodeOne = listPtr->headPtr->nextPtr; nodeOne != NULL; nodeOne = nodeOne->nextPtr) {
+        tempStock = nodeOne->stock;
+        nodeTwo = nodeOne->previousPtr;
+        while (nodeTwo != NULL && datecmp(nodeTwo->stock.date, tempStock.date) == -1) {
+            nodeTwo->nextPtr->stock = nodeTwo->stock;
+            nodeTwo = nodeTwo->previousPtr;
+        }
+        if (nodeTwo == NULL) {
+            listPtr->headPtr->stock = tempStock;
+        } else {
+            nodeTwo->nextPtr->stock = tempStock;
+        }
+    }
 }
 
 void createList( linked_list_t* listPtr) {
@@ -21,28 +45,28 @@ void createList( linked_list_t* listPtr) {
 }
 
 void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
-	listPtr->headPtr = NULL;
+    listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
-	struct dirent* dirEntryPtr;
-    
-    while( (dirEntryPtr = readdir(directory)) != NULL) {
+    struct dirent* dirEntryPtr;
+
+    while ((dirEntryPtr = readdir(directory)) != NULL) {
         FILE* input;
-        stock_t *stock;
+        stock_t stock;
         if (containsText(dirEntryPtr->d_name, ".bin")) {
             input = fopen(dirEntryPtr->d_name, "rb");
-            while (!feof(input)) {
-                if (input != NULL) {
-                    readIntoStock(stock, input);
-                    if (stock == NULL) {
-                        break;
-                    }
-                    insertNode(listPtr, initNode(*stock));
+            if (input != NULL) {
+                while (fread(&stock, sizeof(stock_t), 1, input) == 1) {
+                    insertNode(listPtr, initNode(stock));
                 }
-            } // ugly braces here..
-        } // yeah, ik..
-    } // but it works... soo...
+                fclose(input);
+            } else {
+                printf("Error creating list (could not open file): \"%s\"", dirEntryPtr->d_name);
+            }
+        }
+    }
 }
+
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
     if (listPtr->count == 0) {
@@ -81,7 +105,7 @@ node_t* dequeueNode( linked_list_t* listPtr ) {
     if (listPtr->count > 1) {
         listPtr->tailPtr = listPtr->tailPtr->previousPtr;
         node_t* node = listPtr->tailPtr->nextPtr;
-        listPtr->tailPtr->nextPtr = NULL;
+        listPtr->tailPtr->nextPtr = node->previousPtr = NULL;
         listPtr->count--;
         return node;
     } else {
@@ -122,7 +146,16 @@ void traverseQueue( const linked_list_t* listPtr ) {
 }
 
 void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
-	if (listPtr->count == 0) { return; }
+	char filename[MAX_TICKER_LENGTH + 6];
+    snprintf(filename, sizeof(filename), "%s.bin", ticker);
+    FILE* fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        printf("You do not own any of that stock!\n");
+        return;
+    }
+    fclose(fp);
+    printf("Ticker   Purchase Date   Shares   Price Per Share\n");
+    printf("-------------------------------------------------\n");
     node_t* selectedNode = listPtr->tailPtr;
     while (selectedNode != NULL) {
 		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
@@ -190,31 +223,19 @@ int countShares( const linked_list_t* listPtr) {
 	return value;
 }
 
-// deletes the given list | assumes `overwrite` is valid
 void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
-    FILE* overwrite;
-    if( remove(filename) != 0 )
-        perror( "Error deleting file" );
-    if (listPtr->count == 0) {
-        return;
-    }
-    overwrite = fopen(filename, "wb");
+    FILE* overwrite = fopen(filename, "wb");
     if (overwrite == NULL) {
-        printf("could not open file in write mode\n");
+        printf("Error opening file for writing\n");
         return;
     }
-    int count = 0;
-    printf("-------- the list -------\n");
-    traverseQueue(listPtr);
-    printf("----- entering loop -----\n");
-    while (!(listPtr->count <= 0)) {
-        count++;
-        printf("Writing line %d: ", count);
+    while (listPtr->count > 0) {
         node_t* temp = dequeueNode(listPtr);
-        printStock(&temp->stock);
-        fwrite(&temp->stock, sizeof(stock_t), 1, overwrite);
+        if (writeStockToFile(&temp->stock, overwrite) != 0) {
+            printf("Issue writing stock to file\n");
+        }
         free(temp);
     }
-    printf("------ exiting loop ------\n");
+
     fclose(overwrite);
 }

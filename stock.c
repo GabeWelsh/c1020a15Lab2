@@ -3,14 +3,6 @@
 */
 #include "stock.h"
 #include <stdio.h>
-/*
-typedef struct stock_t {
-   char ticker[MAX_TICKER_LENGTH];
-   date_t date; // date bought
-   int numShares;
-   double pricePerShare;
-} stock_t;
-*/
 
 // prints a stock in a purdy format:
 // <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
@@ -22,6 +14,14 @@ void printStock( const stock_t* stock) {
 // reads value from given file to a stock
 // assumes filePtr is open to a valid file
 void readIntoStock( stock_t* stock, FILE* filePtr) {
-    fread(stock, sizeof(stock_t), 1, filePtr);
+    fread(stock, sizeof(struct stock_t), 1, filePtr);
 }
+// filePtr is in append/write mode and valid
+// returns 0 if success, 1 otherwise
+int writeStockToFile(stock_t* stock, FILE* filePtr) {
+    if (fwrite(stock, sizeof(struct stock_t), 1, filePtr) != 1){
+        return 1;
+    }
 
+    return 0;
+}

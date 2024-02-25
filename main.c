@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
+#include <time.h>
 #include "list.h"
 #include "date.h"
 #include "node.h"
@@ -16,17 +17,48 @@ void report(const linked_list_t* list) {
     char input[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
     scanf("%s",input);
-    printf("Ticker   Purchase Date   Shares   Price Per Share\n");
-    printf("-------------------------------------------------\n");
     printSpecificTicker(list, input);
     return;
 }
 
-void buy(linked_list_t* list) {
-    printNumberOfOwnedStocks(list);
-    char input[MAX_TICKER_LENGTH];
+// returns: 1 = bad | 0 = good
+int buy() {
+    char ticker[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
-    scanf("%s",input);
+    scanf("%s", ticker);
+
+    char filename[MAX_TICKER_LENGTH + 6]; // +6 for ".bin"
+    snprintf(filename, sizeof(filename), "%s.bin", ticker);
+
+    int numShares;
+    printf("Enter number of shares: ");
+    scanf("%d", &numShares);
+    double sharePrice;
+    printf("Enter stock price: ");
+    scanf("%lf", &sharePrice);
+
+    date_t date = getDate();
+
+    stock_t stock;
+    strcpy(stock.ticker, ticker);
+    stock.date = date;
+    stock.numShares = numShares;
+    stock.pricePerShare = sharePrice;
+    
+    printStock(&stock);
+
+    FILE* filePtr = fopen(filename, "a");
+    if (filePtr == NULL) {
+        printf("Could not open file for some reason\n");
+        return 1;
+    }
+    if (writeStockToFile(&stock, filePtr) != 0) {
+        printf("`fwrite` was unsuccessful!\n");
+        fclose(filePtr);
+        return 1;
+    }
+    fclose(filePtr);
+    return 0;
 }
 
 void sell() {
@@ -34,7 +66,7 @@ void sell() {
     printf("Enter stock ticker symbol: ");
     scanf("%s", ticker);
 
-    char filename[MAX_TICKER_LENGTH + 5]; // +5 for ".bin"
+    char filename[MAX_TICKER_LENGTH + 6]; // +6 for ".bin"
     snprintf(filename, sizeof(filename), "%s.bin", ticker);
     
     FILE* fileRB = fopen(filename, "rb");
@@ -46,11 +78,13 @@ void sell() {
     stock_t tempStock;
     linked_list_t list;
     createList(&list);
-    while (!feof(fileRB)) {
-        readIntoStock(&tempStock, fileRB);
+
+    while(fread(&tempStock, sizeof(stock_t), 1, fileRB) == 1) {
         insertNode(&list, initNode(tempStock));
     }
     fclose(fileRB);
+
+    sortList(&list);
 
     // print # of shares and get input
     int shares = countShares(&list);
@@ -118,19 +152,17 @@ int main() {
             case 1:
                 directory = opendir(".");
                 createListFromFiles(&mainList, directory);
+                closedir(directory);
 
                 report(&mainList);
 
                 deleteList(&mainList);
-                closedir(directory);
 
                 break;
             case 2:
-                directory = opendir(".");
-                createListFromFiles(&mainList, directory);
-                //buy();
-                closedir(directory);
-                deleteList(&mainList);
+                if (buy() == 1) {
+                    userInput = 0; // exit the program
+                }
                 break;
             case 3:
                 sell();
