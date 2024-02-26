@@ -12,7 +12,7 @@
 #include "node.h"
 #include "stock.h"
 
-void report(const linked_list_t* list) { 
+void report(const linked_list_t* list) {
     printNumberOfOwnedShares(list);
     char input[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
