@@ -212,6 +212,7 @@ int countShares( const linked_list_t* listPtr) {
     while (count > 0 && selectedNode != NULL) {
         value += selectedNode->stock.numShares;
         selectedNode = selectedNode->previousPtr;
+        count--;
     }
 	return value;
 }
