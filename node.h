@@ -8,6 +8,8 @@ typedef struct node_t {
     struct node_t* previousPtr;
 } node_t;
 
+// parameter: stock to be inserted into the node
+// returns pointer to dynamically allocated node_t
 node_t* initNode(stock_t stock);
 
 #endif

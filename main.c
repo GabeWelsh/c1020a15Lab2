@@ -13,7 +13,7 @@
 #include "stock.h"
 
 void report(const linked_list_t* list) { 
-    printNumberOfOwnedStocks(list);
+    printNumberOfOwnedShares(list);
     char input[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
     scanf("%s",input);
@@ -40,7 +40,7 @@ int buy() {
     date_t date = getDate();
 
     stock_t stock;
-    strcpy(stock.ticker, ticker);
+    strlcpy(stock.ticker, ticker, MAX_TICKER_LENGTH);
     stock.date = date;
     stock.numShares = numShares;
     stock.pricePerShare = sharePrice;
@@ -59,6 +59,7 @@ int buy() {
     return 0;
 }
 
+// 
 void sell() {
     char ticker[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");

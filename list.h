@@ -13,8 +13,8 @@ typedef struct {
     int count;
 } linked_list_t;
 
-
-void printNumberOfOwnedStocks( const linked_list_t* listPtr);
+// see `list.c` for function comments
+void printNumberOfOwnedShares( const linked_list_t* listPtr);
 void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]);
 int countShares( const linked_list_t* listPtr);
 void listUpdateSingleFile( linked_list_t* listPtr, const char* filename );

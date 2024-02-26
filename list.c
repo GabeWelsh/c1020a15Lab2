@@ -6,16 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-int containsText(const char *mainText, const char* minorText) {
+// function only in this file
+// returns 1 if `mainText` ends with `minorText`, 0 otherwise
+int stringEndsWith(const char *mainText, const char* minorText) {
     int main_len = strlen(mainText);
     int minor_len = strlen(minorText);
     if (main_len < minor_len) {
         return 0;
     }
-    return strncmp(mainText + main_len - minor_len, ".bin", minor_len) == 0;
+    return (strncmp(mainText + main_len - minor_len, ".bin", minor_len) == 0);
 }
 
-// sorts in decending order (oldest at tail)
+// sorts the list in decending order based on date (oldest at tail)
 void sortList(linked_list_t *listPtr) {
     if (listPtr->count <= 1) {
         return;
@@ -38,12 +40,15 @@ void sortList(linked_list_t *listPtr) {
     }
 }
 
+// sets each variable in supplied list to it's corresponding NULL value
 void createList( linked_list_t* listPtr) {
     listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
     listPtr->count = 0;
 }
 
+// goes through all .bin files in supplied directory and reads it into given list
+// assumes `directory` was just opened and valid | assumes `listPtr` is not NULL
 void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
     listPtr->headPtr = NULL;
     listPtr->tailPtr = NULL;
@@ -53,7 +58,7 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
     while ((dirEntryPtr = readdir(directory)) != NULL) {
         FILE* input;
         stock_t stock;
-        if (containsText(dirEntryPtr->d_name, ".bin")) {
+        if (stringEndsWith(dirEntryPtr->d_name, ".bin")) {
             input = fopen(dirEntryPtr->d_name, "rb");
             if (input != NULL) {
                 while (fread(&stock, sizeof(struct stock_t), 1, input) == 1) {
@@ -67,6 +72,8 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
     }
 }
 
+// inserts supplied node (`nPtr`) into supplied `listPtr` at the head
+// assumes `listPtr` and `nPtr` are not NULL
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
     if (listPtr->count == 0) {
         listPtr->headPtr = nPtr;
@@ -81,7 +88,8 @@ void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
     }
 }
 
-
+// returns the node contained at `listPtr`'s head
+// returns NULL if `listPtr` is empty
 node_t* popNode( linked_list_t* listPtr ) {
     if (listPtr->count > 1) {
         listPtr->headPtr = listPtr->headPtr->nextPtr;
@@ -100,6 +108,8 @@ node_t* popNode( linked_list_t* listPtr ) {
     }
 }
 
+// returns the node contained at `listPtr`'s tail
+// returns NULL if `listPtr` is empty
 node_t* dequeueNode( linked_list_t* listPtr ) {
     if (listPtr->count > 1) {
         listPtr->tailPtr = listPtr->tailPtr->previousPtr;
@@ -107,21 +117,28 @@ node_t* dequeueNode( linked_list_t* listPtr ) {
         listPtr->tailPtr->nextPtr = node->previousPtr = NULL;
         listPtr->count--;
         return node;
-    } else {
+    } else if (listPtr->count == 1) {
         node_t* temp = listPtr->tailPtr;
         listPtr->headPtr = NULL;
         listPtr->tailPtr = NULL;
         listPtr->count--;
         return temp;
+    } else {
+        return NULL;
     }
 }
 
+// iterates through entire list, dequeueing then freeing each node
+// assumes `listPtr` is not NULL
 void deleteList( linked_list_t* listPtr ) {
     while (listPtr->count != 0) {
         free(dequeueNode(listPtr));
     }
 }
 
+// iterates through `listPtr` starting at the head,
+//               printing each stock along the way
+// assumes `listPtr` is not NULL
 void traverseStack( const linked_list_t* listPtr ) { 
     if (listPtr->count == 0) { return; }
     node_t* selectedNode = listPtr->headPtr;
@@ -132,6 +149,9 @@ void traverseStack( const linked_list_t* listPtr ) {
     printStock(&selectedNode->stock);
 }
 
+// iterates through `listPtr` starting at the tail,
+//               printing each stock along the way
+// assumes `listPtr` is not NULL
 void traverseQueue( const linked_list_t* listPtr ) {
     if (listPtr->count == 0) { 
         printf("Empty list\n");
@@ -144,15 +164,13 @@ void traverseQueue( const linked_list_t* listPtr ) {
     }
 }
 
+// iterate through `listPtr` starting at the tail, 
+//    printing only the stocks that match `ticker`
+// assumes `listPtr` is not NULL and contains at least 
+//                              1 of the given `ticker`
 void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
 	char filename[MAX_TICKER_LENGTH + 6];
     snprintf(filename, sizeof(filename), "%s.bin", ticker);
-    FILE* fp = fopen(filename, "rb");
-    if (fp == NULL) {
-        printf("You do not own any of that stock!\n");
-        return;
-    }
-    fclose(fp);
     printf("Ticker   Purchase Date   Shares   Price Per Share\n");
     printf("-------------------------------------------------\n");
     node_t* selectedNode = listPtr->tailPtr;
@@ -163,26 +181,43 @@ void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
     }
 }
 
-void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
+// prints the number of owned  per each ticker
+// <ticker> <number of shares>
+// note: limit is 20 unique tickers
+void printNumberOfOwnedShares( const linked_list_t* listPtr) {
+    printf("inside `printNumberOfOwnedShares`\n");
+    fflush(stdout);
     char* stockNames[20] = {NULL};
     int stockCount[20] = {0};
     int length = 20;
 
+    if (listPtr == NULL) { return; }
     if (listPtr->count == 0) { return; }
+    printf("entering loop\n");
+    fflush(stdout);
     node_t* selectedNode = listPtr->tailPtr;
+    int count = 1;
     while (selectedNode != NULL) {
+        printf("iter: %d", count);
         for (int i = 0; i < length; i++) {
             if (stockNames[i] == NULL) {
+                printf("stockNames[%d] was NULL. filling it now\n", count-1);
+                fflush(stdout);
                 stockNames[i] = selectedNode->stock.ticker;
                 stockNames[i] = selectedNode->stock.ticker;
                 stockCount[i] = 1;
                 break;
             } else if (strcmp(selectedNode->stock.ticker, stockNames[i]) == 0) {
+                printf("stockNames[%d] = selectedNode->stock.ticker. incrementing stockCount[%d]\n", count-1, count-1);
+                fflush(stdout);
                 stockCount[i]++;
                 break;
             }
         }
+        printf("moving to next node\n");
+        fflush(stdout);
         selectedNode = selectedNode->previousPtr;
+        count++;
     }
     if (stockNames[0] == NULL){
         printf("You do not own any stocks\n");
@@ -196,18 +231,24 @@ void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
     }
 }
 
+// iterates through the given list starting at the tail
+//                     and sums up all the nodes shares
+// assumes that `listPtr` is not NULL
+// returns the total number of shares in the list
 int countShares( const linked_list_t* listPtr) {
 	int value = 0;
 	if (listPtr->count == 0) { return 0; }
     node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode->previousPtr != NULL) {
+    while (selectedNode != NULL) {
 		value += selectedNode->stock.numShares;
         selectedNode = selectedNode->previousPtr;
     }
-	value += selectedNode->stock.numShares;
 	return value;
 }
 
+// opens given `filename` and overwrites it with the data stored in `listPtr`
+// assumes `listPtr` is not NULL
+// NOTE: this function will delete `listPtr` since it uses `dequeueNode`
 void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
     FILE* overwrite = fopen(filename, "wb");
     if (overwrite == NULL) {
@@ -221,6 +262,5 @@ void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
         }
         free(temp);
     }
-
     fclose(overwrite);
 }

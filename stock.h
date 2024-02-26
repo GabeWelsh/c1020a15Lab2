@@ -14,6 +14,7 @@ typedef struct stock_t {
 
 // prints a stock in a purdy format:
 // <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
+// parameter: stock: the stock to be printed
 void printStock( const stock_t* stock);
 
 #endif
