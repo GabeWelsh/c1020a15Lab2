@@ -15,10 +15,5 @@ typedef struct stock_t {
 // prints a stock in a purdy format:
 // <stock name>      <month/day/year>    <numShares>      $   <pricePerShare>
 void printStock( const stock_t* stock);
-// reads value from given file to a stock
-void readIntoStock( stock_t* stock, FILE* filePtr);
-// filePtr is in append/write mode and valid
-// returns 0 if success, 1 otherwise
-int writeStockToFile(stock_t* stock, FILE* filePtr);
 
 #endif

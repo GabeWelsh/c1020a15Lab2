@@ -45,14 +45,12 @@ int buy() {
     stock.numShares = numShares;
     stock.pricePerShare = sharePrice;
     
-    printStock(&stock);
-
     FILE* filePtr = fopen(filename, "a");
     if (filePtr == NULL) {
         printf("Could not open file for some reason\n");
         return 1;
     }
-    if (writeStockToFile(&stock, filePtr) != 0) {
+    if (fwrite(&stock, sizeof(struct stock_t), 1, filePtr) != 1) {
         printf("`fwrite` was unsuccessful!\n");
         fclose(filePtr);
         return 1;
@@ -88,7 +86,7 @@ void sell() {
 
     // print # of shares and get input
     int shares = countShares(&list);
-    printf("You own %d shares of \"%s\"\n", shares, filename);
+    printf("You own %d shares of \"%s\"\n", shares, ticker);
     int toSell;
     double stockPrice;
     printf("How many do you want to sell? ");
@@ -153,9 +151,10 @@ int main() {
                 directory = opendir(".");
                 createListFromFiles(&mainList, directory);
                 closedir(directory);
-
-                report(&mainList);
-
+                if (mainList.count > 0)
+                    report(&mainList);
+                else
+                    printf("You do not own any stocks yet.\n");
                 deleteList(&mainList);
 
                 break;
@@ -165,7 +164,14 @@ int main() {
                 }
                 break;
             case 3:
-                sell();
+                directory = opendir(".");
+                createListFromFiles(&mainList, directory);
+                closedir(directory);
+                if (mainList.count > 0)
+                    sell();
+                else
+                    printf("You do not own any stocks yet.\n");
+                deleteList(&mainList);
                 break;
             default:
                 printf("Please enter a valid input.\n");

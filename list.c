@@ -56,7 +56,7 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
         if (containsText(dirEntryPtr->d_name, ".bin")) {
             input = fopen(dirEntryPtr->d_name, "rb");
             if (input != NULL) {
-                while (fread(&stock, sizeof(stock_t), 1, input) == 1) {
+                while (fread(&stock, sizeof(struct stock_t), 1, input) == 1) {
                     insertNode(listPtr, initNode(stock));
                 }
                 fclose(input);
@@ -66,7 +66,6 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
         }
     }
 }
-
 
 void insertNode( linked_list_t* listPtr, node_t* nPtr ) {
     if (listPtr->count == 0) {
@@ -197,20 +196,6 @@ void printNumberOfOwnedStocks( const linked_list_t* listPtr) {
     }
 }
 
-int countTickerStocks( const linked_list_t* listPtr, const char ticker[]) {
-	int value = 0;
-	if (listPtr->count == 0) { return 0; }
-    node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode->previousPtr != NULL) {
-		if (strcmp(selectedNode->stock.ticker, ticker) == 0)
-			value++;
-        selectedNode = selectedNode->previousPtr;
-    }
-	if (strcmp(selectedNode->stock.ticker, ticker) == 0)
-		value++;
-	return value;
-}
-
 int countShares( const linked_list_t* listPtr) {
 	int value = 0;
 	if (listPtr->count == 0) { return 0; }
@@ -231,7 +216,7 @@ void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
     }
     while (listPtr->count > 0) {
         node_t* temp = dequeueNode(listPtr);
-        if (writeStockToFile(&temp->stock, overwrite) != 0) {
+        if (fwrite(temp, sizeof(struct stock_t), 1, overwrite) != 1) {
             printf("Issue writing stock to file\n");
         }
         free(temp);
