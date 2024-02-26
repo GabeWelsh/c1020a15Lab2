@@ -17,27 +17,56 @@ int stringEndsWith(const char *mainText, const char* minorText) {
     return (strncmp(mainText + main_len - minor_len, ".bin", minor_len) == 0);
 }
 
-// sorts the list in decending order based on date (oldest at tail)
-void sortList(linked_list_t *listPtr) {
-    if (listPtr->count <= 1) {
-        return;
-    }
-    node_t *nodeOne, *nodeTwo;
-    stock_t tempStock;
+// // sorts the list in decending order based on date (oldest at tail)
+// void sortList(linked_list_t *listPtr) {
+//     if (listPtr == NULL) {
+//         printf("list was NULL\n");
+//         return;
+//     }
+//     if (listPtr->count <= 1) {
+//         return;
+//     }
+//     printf("did not return early\n");
+//     node_t *nodeOne, *nodeTwo;
+//     stock_t tempStock;
 
-    for (nodeOne = listPtr->headPtr->nextPtr; nodeOne != NULL; nodeOne = nodeOne->nextPtr) {
-        tempStock = nodeOne->stock;
-        nodeTwo = nodeOne->previousPtr;
-        while (nodeTwo != NULL && datecmp(nodeTwo->stock.date, tempStock.date) == -1) {
-            nodeTwo->nextPtr->stock = nodeTwo->stock;
-            nodeTwo = nodeTwo->previousPtr;
-        }
-        if (nodeTwo == NULL) {
-            listPtr->headPtr->stock = tempStock;
-        } else {
-            nodeTwo->nextPtr->stock = tempStock;
-        }
-    }
+//     for (nodeOne = listPtr->headPtr->nextPtr; nodeOne != NULL; nodeOne = nodeOne->nextPtr) {
+//         printf("nodeOne -> ");
+//         printStock(&nodeOne->stock);
+//         tempStock = nodeOne->stock;
+//         nodeTwo = nodeOne->previousPtr;
+//         printf("nodeTwo -> ");
+//         printStock(&nodeTwo->stock);
+//         while (nodeTwo != NULL && datecmp(nodeTwo->stock.date, tempStock.date) == -1) {
+//             printf("swaping ");
+//             nodeTwo->nextPtr->stock = nodeTwo->stock;
+//             nodeTwo = nodeTwo->previousPtr;
+//         }
+//         printf("Now we here\n");
+//         if (printf("checking nodeTwo\n") && nodeTwo == NULL && printf("nodeTwo == NULL\n")) {
+//             printf("nodeTwo was NULL\n");
+//             listPtr->headPtr->stock = tempStock;
+//         } else {
+//             if (nodeTwo->nextPtr != NULL) {
+//                 printf("nodeTwo->nextPtr was not NULL");
+//                 nodeTwo->nextPtr->stock = tempStock;
+//             } else {
+//                 printf("leaving function\n");
+//                 return;
+//             }
+//         }
+//     }
+// }
+
+
+void swapNodes(node_t* nodeOne, node_t* nodeTwo) {
+    node_t temp = *nodeOne;
+    nodeOne->nextPtr = nodeTwo->nextPtr;
+    nodeOne->previousPtr = nodeTwo->previousPtr;
+    nodeOne->stock = nodeTwo->stock;
+    nodeTwo->nextPtr = temp.nextPtr;
+    nodeTwo->previousPtr = temp.previousPtr;
+    nodeTwo->stock = temp.stock;
 }
 
 // sets each variable in supplied list to it's corresponding NULL value
@@ -203,10 +232,6 @@ void printNumberOfOwnedShares( const linked_list_t* listPtr) {
             } else if (strcmp(selectedNode->stock.ticker, stockNames[i]) == 0) {
                 stockCount[i]++;
                 break;
-            } else {
-                printf("stockNames[%d] does not equal selectedNode->stock.ticker\n", i);
-                printf("It also isn't NULL for some reason.\n");
-                return;
             }
         }
         selectedNode = selectedNode->previousPtr;
@@ -235,8 +260,9 @@ int countShares( const linked_list_t* listPtr) {
 	int value = 0;
 	if (listPtr->count == 0) { return 0; }
     node_t* selectedNode = listPtr->tailPtr;
-    while (selectedNode != NULL) {
-		value += selectedNode->stock.numShares;
+    int count = listPtr->count;
+    while (count > 0 && selectedNode != NULL) {
+        value += selectedNode->stock.numShares;
         selectedNode = selectedNode->previousPtr;
     }
 	return value;

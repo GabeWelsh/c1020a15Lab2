@@ -67,7 +67,6 @@ void sell() {
 
     char filename[MAX_TICKER_LENGTH + 6]; // +6 for ".bin"
     snprintf(filename, sizeof(filename), "%s.bin", ticker);
-    
     FILE* fileRB = fopen(filename, "rb");
     if (fileRB == NULL) {
         printf("You do not own any \"%s\" stocks.\n", ticker);
@@ -77,13 +76,12 @@ void sell() {
     stock_t tempStock;
     linked_list_t list;
     createList(&list);
-
     while(fread(&tempStock, sizeof(stock_t), 1, fileRB) == 1) {
         insertNode(&list, initNode(tempStock));
     }
     fclose(fileRB);
 
-    sortList(&list);
+    // sortList(&list);
 
     // print # of shares and get input
     int shares = countShares(&list);
