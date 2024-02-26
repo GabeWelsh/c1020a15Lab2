@@ -61,7 +61,12 @@ void createListFromFiles(linked_list_t *listPtr, DIR *directory) {
         if (stringEndsWith(dirEntryPtr->d_name, ".bin")) {
             input = fopen(dirEntryPtr->d_name, "rb");
             if (input != NULL) {
+                printf("Opened: \"%s\"\n", dirEntryPtr->d_name);
+                fflush(stdout);
                 while (fread(&stock, sizeof(struct stock_t), 1, input) == 1) {
+                    printf("Inserting stock: ");
+                    printStock(&stock);
+                    fflush(stdout);
                     insertNode(listPtr, initNode(stock));
                 }
                 fclose(input);
@@ -181,13 +186,13 @@ void printSpecificTicker(const linked_list_t* listPtr, const char ticker[]) {
     }
 }
 
-// prints the number of owned  per each ticker
+// prints the number of owned shares for each ticker
 // <ticker> <number of shares>
-// note: limit is 20 unique tickers
+// note: limit is 20 unique tickers (.bin)
 void printNumberOfOwnedShares( const linked_list_t* listPtr) {
     printf("inside `printNumberOfOwnedShares`\n");
     fflush(stdout);
-    char* stockNames[20] = {NULL};
+    char stockNames[20][MAX_TICKER_LENGTH];
     int stockCount[20] = {0};
     int length = 20;
 
@@ -198,13 +203,12 @@ void printNumberOfOwnedShares( const linked_list_t* listPtr) {
     node_t* selectedNode = listPtr->tailPtr;
     int count = 1;
     while (selectedNode != NULL) {
-        printf("iter: %d", count);
+        printf("iter: %d\n", count);
         for (int i = 0; i < length; i++) {
-            if (stockNames[i] == NULL) {
+            if (stockNames[i] == 0) {
                 printf("stockNames[%d] was NULL. filling it now\n", count-1);
                 fflush(stdout);
-                stockNames[i] = selectedNode->stock.ticker;
-                stockNames[i] = selectedNode->stock.ticker;
+                strlcpy(stockNames[i], selectedNode->stock.ticker, MAX_TICKER_LENGTH);
                 stockCount[i] = 1;
                 break;
             } else if (strcmp(selectedNode->stock.ticker, stockNames[i]) == 0) {
@@ -260,6 +264,7 @@ void listUpdateSingleFile(linked_list_t* listPtr, const char* filename) {
         if (fwrite(temp, sizeof(struct stock_t), 1, overwrite) != 1) {
             printf("Issue writing stock to file\n");
         }
+        fflush(overwrite);
         free(temp);
     }
     fclose(overwrite);
