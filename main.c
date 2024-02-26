@@ -12,6 +12,8 @@
 #include "node.h"
 #include "stock.h"
 
+// print number of owned shares for each stock
+// asks user for input then prints the details about given stock
 void report(const linked_list_t* list) {
     printNumberOfOwnedShares(list);
     char input[MAX_TICKER_LENGTH];
@@ -22,6 +24,7 @@ void report(const linked_list_t* list) {
 }
 
 // returns: 1 = bad | 0 = good
+// buys a stock and appends it to the ticker.bin.
 int buy() {
     char ticker[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
@@ -59,7 +62,8 @@ int buy() {
     return 0;
 }
 
-// 
+// asks user for input to ultimately sell a certain # of shares in a stock
+// updates the .bin file accordingly
 void sell() {
     char ticker[MAX_TICKER_LENGTH];
     printf("Enter stock ticker symbol: ");
@@ -81,8 +85,6 @@ void sell() {
     }
     fclose(fileRB);
 
-    // sortList(&list);
-
     // print # of shares and get input
     int shares = countShares(&list);
     printf("You own %d shares of \"%s\"\n", shares, ticker);
@@ -99,10 +101,10 @@ void sell() {
     }
     printf("What is the current stock price? ");
     scanf("%lf", &stockPrice);
-    // calc money and edit list accordingly
+
     double priceToBuy, sellingPrice;
     priceToBuy = sellingPrice = 0;
-    while (toSell > 0) { // Note: not possible to go out of bounds (line 97) so no need to check ********************************
+    while (toSell > 0) {
         if (list.tailPtr->stock.numShares > toSell) { // not deleting all shares (end loop)
             priceToBuy += toSell * list.tailPtr->stock.pricePerShare;
             sellingPrice += toSell * stockPrice;
