@@ -79,9 +79,7 @@ void sell() {
     // get data from file
     stock_t tempStock;
     linked_list_t list;
-    printf("creating list\n");
     createList(&list);
-    printf("created list\n");
     while(fread(&tempStock, sizeof(stock_t), 1, fileRB) == 1) {
         insertNode(&list, initNode(tempStock));
     }

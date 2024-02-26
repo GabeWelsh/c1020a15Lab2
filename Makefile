@@ -19,4 +19,4 @@ date: date.c date.h
 	gcc -c date.c
 
 clean:
-	rm -rf *.gch *.o executable *.bin
+	rm -rf *.gch *.o executable
